@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>САД та ГОРОД</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .menu-item {
+            position: relative;
+            background-color: #d1f3d1;
+        }
+        
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            gap: 1rem;
+            transition: background-color 0.3s;
+            color: #2e7d32;
+            text-decoration: none;
+        }
+        
+        .menu-item:hover > a {
+            background-color: #82d682;
+        }
+        
+        .submenu {
+            display: none;
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background-color: white;
+            min-width: 600px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .menu-item:hover > .submenu {
+            display: flex;
+            gap: 2rem;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .submenu > div {
+            flex: 1;
+        }
+        
+        .submenu-category {
+            margin-bottom: 1.5rem;
+        }
+        
+        .submenu-category h3 {
+            color: #2e7d32;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .submenu-category ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .submenu-category li {
+            margin: 0.25rem 0;
+        }
+        
+        .submenu-category a {
+            color: #4a4a4a;
+            text-decoration: none;
+            padding: 0.25rem 0;
+            transition: color 0.3s;
+            display: block;
+        }
+        
+        .submenu-category a:hover {
+            color: #2e7d32;
+        }
+
+        .carousel {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+        }
+
+        .carousel-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            display: block;
+        }
+
+        .carousel-item.active {
+            opacity: 1;
+            z-index: 1;
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .carousel-item .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .carousel-item:hover .overlay {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .carousel-item h1 {
+            color: white;
+            font-size: 3rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s ease 0.3s;
+        }
+
+        .carousel-item.active h1 {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 2;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-button:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-button.prev {
+            left: 20px;
+        }
+
+        .carousel-button.next {
+            right: 20px;
+        }
+
+        /* Додаємо стилі для зірок */
+        .star-rating label {
+            color: #ccc;
+            transition: color 0.3s;
+        }
+        
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #ffd700;
+        }
+
+        /* Стилі для прокрутки товарів */
+        .products-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 1.5rem;
+            padding: 1rem 0;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+            position: relative;
+        }
+
+        .products-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .product-card {
+            flex: 0 0 300px;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Стилі для кнопок прокрутки */
+        .scroll-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .scroll-button:hover {
+            background: #f0f0f0;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .scroll-button.prev {
+            left: -20px;
+        }
+
+        .scroll-button.next {
+            right: -20px;
+        }
+
+        /* Додаємо тінь для кнопок при наведенні */
+        .scroll-button:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* Додаємо стилі для випадаючого списку пошуку */
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .search-result-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .search-result-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+        }
+
+        .search-result-item .product-info {
+            flex: 1;
+        }
+
+        .search-result-item .product-name {
+            font-weight: 500;
+            color: #2e7d32;
+        }
+
+        .search-result-item .product-price {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        /* Додаємо стилі для корзини */
+        .cart-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 320px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .cart-dropdown.active {
+            display: block;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            gap: 1rem;
+        }
+
+        .cart-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-weight: 500;
+            color: #2e7d32;
+        }
+
+        .cart-item-price {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .quantity-btn {
+            background: #f0f0f0;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .quantity-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .cart-total {
+            padding: 1rem;
+            border-top: 2px solid #eee;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cart-actions {
+            padding: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .cart-actions button {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .view-cart {
+            background: #f0f0f0;
+        }
+
+        .checkout {
+            background: #2e7d32;
+            color: white;
+        }
+
+        .view-cart:hover {
+            background: #e0e0e0;
+        }
+
+        .checkout:hover {
+            background: #1b5e20;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#82d682',
+                        'light-green': '#d1f3d1',
+                        'dark-green': '#2e7d32'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-light-green">
+    <!-- Хедер -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="text-2xl font-bold text-dark-green">САД та ГОРОД</a>
+            </div>
+            <div class="flex-1 max-w-xl mx-4">
+                <div class="relative">
+                    <input type="text" id="search-input" placeholder="Пошук товарів..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                    <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <div id="search-results" class="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg hidden"></div>
+                </div>
+            </div>
+            <nav class="flex items-center space-x-4">
+                <div id="auth-links">
+                    <a href="/login.html" class="text-gray-600 hover:text-primary">Увійти</a>
+                    <a href="/register.html" class="ml-4 text-gray-600 hover:text-primary">Реєстрація</a>
+                </div>
+                <div id="user-menu" class="hidden">
+                    <a href="/profile.html" class="text-gray-600 hover:text-primary">Профіль</a>
+                    <button id="logout-btn" class="ml-4 text-gray-600 hover:text-primary">Вийти</button>
+                </div>
+                <div class="relative">
+                    <button id="cart-btn" class="flex items-center text-gray-600 hover:text-primary">
+                        <i class="fas fa-shopping-cart"></i>
+                    </button>
+                    <div id="cart-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
+                        <div class="p-4">
+                            <h3 class="text-lg font-semibold mb-4">Кошик</h3>
+                            <div id="cart-items" class="space-y-4">
+                                <!-- Тут будуть відображатися товари -->
+                            </div>
+                            <div class="mt-4 pt-4 border-t">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="font-semibold">Всього:</span>
+                                    <span id="cart-total" class="font-semibold">0 ₴</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <button onclick="clearCart()" class="block w-full text-center bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors">
+                                        Очистити кошик
+                                    </button>
+                                    <a href="/cart.html" class="block w-full text-center bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                        Переглянути кошик
+                                    </a>
+                                    <button id="checkout-btn" class="block w-full text-center bg-dark-green text-white py-2 rounded-lg hover:bg-primary transition-colors">
+                                        Оформити замовлення
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Після хедера додаємо банер з пропозиціями -->
+    <div class="bg-dark-green text-white py-2">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-truck"></i>
+                    <span>Безкоштовна доставка від 1000₴</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-phone"></i>
+                    <span>+380-99-999-9999</span>
+                    <i class="fas fa-clock"></i>
+                    <span>Пн-Нд: 9:00 - 18:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex gap-8">
+    <!-- Меню -->
+            <nav class="w-64 flex-shrink-0">
+                <ul class="rounded-lg overflow-hidden">
+                    <li class="menu-item">
+                        <a href="/category.html?type=plants" class="text-dark-green">
+                            <i class="fas fa-seedling"></i>
+                            <span>Рослини</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="/category.html?type=tools" class="text-dark-green">
+                            <i class="fas fa-tools"></i>
+                            <span>Інструменти</span>
+                        </a>
+            </li>
+                    <li class="menu-item">
+                        <a href="/category.html?type=fertilizers" class="text-dark-green">
+                            <i class="fas fa-flask"></i>
+                            <span>Добрива</span>
+                        </a>
+            </li>
+                    <li class="menu-item">
+                        <a href="/category.html?type=furniture" class="text-dark-green">
+                            <i class="fas fa-couch"></i>
+                            <span>Меблі</span>
+                        </a>
+            </li>
+                    <li class="menu-item">
+                        <a href="/category.html?type=lighting" class="text-dark-green">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Освітлення</span>
+                        </a>
+            </li>
+        </ul>
+    </nav>
+    
+            <!-- Основний контент -->
+            <div class="flex-1">
+                <!-- Карусель -->
+                <div class="relative rounded-lg overflow-hidden mb-8">
+                    <div class="carousel">
+                        <div class="carousel-item active">
+                            <img src="images/stovp.jpg" alt="САД та ГОРОД">
+                            <div class="overlay">
+                                <h1>САД та ГОРОД</h1>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="images/flower.jpg" alt="Квіти">
+                            <div class="overlay">
+                                <h1>Квіти та рослини</h1>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <img src="images/stovp.jpg" alt="Інструменти">
+                            <div class="overlay">
+                                <h1>Садові інструменти</h1>
+                            </div>
+                </div>  
+            </div>
+                    <button class="carousel-button prev" onclick="prevSlide()">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="carousel-button next" onclick="nextSlide()">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+    </div>
+
+                <!-- Новинки -->
+                <section class="mb-12">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-dark-green">Новинки</h2>
+                    </div>
+                    <div class="relative">
+                        <div id="new-products" class="products-container">
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=1" class="block">
+                                    <img src="images/flower.jpg" alt="Штучне дерево" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Штучне дерево</h3>
+                                    <p class="text-dark-green font-bold">1600 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+                            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=2" class="block">
+                                    <img src="images/stovp.jpg" alt="Міні лопата" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Міні лопата</h3>
+                                    <p class="text-dark-green font-bold">1230 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+                            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=3" class="block">
+                                    <img src="images/flower.jpg" alt="Поливна система" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Поливна система</h3>
+                                    <p class="text-dark-green font-bold">2000 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+                            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=4" class="block">
+                                    <img src="images/stovp.jpg" alt="Квітка 'Фіалка'" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Квітка "Фіалка"</h3>
+                                    <p class="text-dark-green font-bold">330 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+                            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=5" class="block">
+                                    <img src="images/flower.jpg" alt="Садові ножиці" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Садові ножиці</h3>
+                                    <p class="text-dark-green font-bold">450 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+                            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=6" class="block">
+                                    <img src="images/stovp.jpg" alt="Газонокосарка" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Газонокосарка</h3>
+                                    <p class="text-dark-green font-bold">8500 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=7" class="block">
+                                    <img src="images/flower.jpg" alt="Садовий стіл" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Садовий стіл</h3>
+                                    <p class="text-dark-green font-bold">3200 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+            </div>
+                        </div>
+                        <button class="scroll-button prev" onclick="scrollProducts('new-products', 'left')">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="scroll-button next" onclick="scrollProducts('new-products', 'right')">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+        </div>
+    </section>
+
+                <!-- Топ продажів -->
+                <section class="mb-12">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-dark-green">Топ продажів</h2>
+                    </div>
+                    <div class="relative">
+                        <div id="top-products" class="products-container">
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=8" class="block">
+                                    <img src="images/flower.jpg" alt="Земля 50л" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Земля 50л</h3>
+                                    <p class="text-dark-green font-bold">1500 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+                            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=9" class="block">
+                                    <img src="images/stovp.jpg" alt="Поливний шланг" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Поливний шланг 1м</h3>
+                                    <p class="text-dark-green font-bold">200 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+                            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=10" class="block">
+                                    <img src="images/flower.jpg" alt="Відро 20л" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Відро 20л</h3>
+                                    <p class="text-dark-green font-bold">250 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+                            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=11" class="block">
+                                    <img src="images/stovp.jpg" alt="Сітка 1м" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Сітка 1м</h3>
+                                    <p class="text-dark-green font-bold">100 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=12" class="block">
+                                    <img src="images/flower.jpg" alt="Садові рукавиці" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Садові рукавиці</h3>
+                                    <p class="text-dark-green font-bold">180 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=13" class="block">
+                                    <img src="images/stovp.jpg" alt="Садовий насос" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Садовий насос</h3>
+                                    <p class="text-dark-green font-bold">2800 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+            </div>
+                            <div class="product-card p-4">
+                                <a href="/product.html?id=14" class="block">
+                                    <img src="images/flower.jpg" alt="Садовий диван" class="w-full h-48 object-cover rounded-lg mb-4">
+                                    <h3 class="font-semibold mb-2">Садовий диван</h3>
+                                    <p class="text-dark-green font-bold">4200 ₴</p>
+                                </a>
+                                <button class="w-full mt-4 bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    <i class="fas fa-shopping-cart mr-2"></i>
+                                </button>
+            </div>
+                        </div>
+                        <button class="scroll-button prev" onclick="scrollProducts('top-products', 'left')">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="scroll-button next" onclick="scrollProducts('top-products', 'right')">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+        </div>
+    </section>
+
+                <!-- Додаємо секцію Переваги -->
+                <section class="bg-white rounded-lg shadow-md p-6 mb-12">
+                    <h2 class="text-2xl font-bold mb-6 text-center text-dark-green">Чому обирають нас</h2>
+                    <div class="grid grid-cols-4 gap-6">
+                        <div class="text-center">
+                            <i class="fas fa-truck text-4xl text-primary mb-4"></i>
+                            <h3 class="font-semibold mb-2">Швидка доставка</h3>
+                            <p class="text-gray-600">Доставляємо по всій Україні</p>
+            </div>
+                        <div class="text-center">
+                            <i class="fas fa-medal text-4xl text-primary mb-4"></i>
+                            <h3 class="font-semibold mb-2">Якісні товари</h3>
+                            <p class="text-gray-600">Перевірені постачальники</p>
+            </div>
+                        <div class="text-center">
+                            <i class="fas fa-headset text-4xl text-primary mb-4"></i>
+                            <h3 class="font-semibold mb-2">Підтримка 24/7</h3>
+                            <p class="text-gray-600">Завжди на зв'язку</p>
+            </div>
+                        <div class="text-center">
+                            <i class="fas fa-shield-alt text-4xl text-primary mb-4"></i>
+                            <h3 class="font-semibold mb-2">Безпечна оплата</h3>
+                            <p class="text-gray-600">Захищені платежі</p>
+            </div>
+        </div>
+    </section>
+    
+                <!-- Додаємо секцію Підписка на новини -->
+                <section class="bg-primary rounded-lg shadow-md p-6 mb-12">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white mb-2">Підпишіться на наші новини</h2>
+                            <p class="text-white">Отримуйте перші новини про акції та знижки</p>
+                        </div>
+                        <form class="flex gap-4">
+                            <input type="email" placeholder="Ваш email" class="px-4 py-2 rounded-lg w-64">
+                            <button type="submit" class="bg-white text-primary px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                Підписатися
+                            </button>
+                        </form>
+        </div>
+    </section>
+
+                <!-- Відгуки -->
+                <section class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-6 text-center text-dark-green">Відгуки</h2>
+                    <div class="flex gap-6">
+                        <div class="flex-1">
+                            <form id="review-form" class="space-y-4">
+                                <div>
+                                    <label class="block mb-2">Ваше ім'я:</label>
+                                    <input type="text" id="review-name" required class="w-full p-4 border rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block mb-2">Оцінка:</label>
+                                    <div class="star-rating flex gap-2">
+                                        <input type="radio" name="rating" value="5" id="rating-5" class="hidden">
+                                        <label for="rating-5" class="cursor-pointer text-2xl">⭐</label>
+                                        <input type="radio" name="rating" value="4" id="rating-4" class="hidden">
+                                        <label for="rating-4" class="cursor-pointer text-2xl">⭐</label>
+                                        <input type="radio" name="rating" value="3" id="rating-3" class="hidden">
+                                        <label for="rating-3" class="cursor-pointer text-2xl">⭐</label>
+                                        <input type="radio" name="rating" value="2" id="rating-2" class="hidden">
+                                        <label for="rating-2" class="cursor-pointer text-2xl">⭐</label>
+                                        <input type="radio" name="rating" value="1" id="rating-1" class="hidden">
+                                        <label for="rating-1" class="cursor-pointer text-2xl">⭐</label>
+                                        <input type="radio" name="rating" value="0" id="rating-0" class="hidden">
+                                        <label for="rating-0" class="cursor-pointer text-2xl">⭐</label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block mb-2">Ваш коментар:</label>
+                                    <textarea id="review-text" required class="w-full p-4 border rounded-lg resize-none h-32"></textarea>
+                                </div>
+                                <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    Залишити відгук
+                                </button>
+                            </form>
+                        </div>
+                        <div class="flex-1">
+                            <div id="reviews-list" class="space-y-4 max-h-[400px] overflow-y-auto">
+                                <!-- Тут будуть відображатися відгуки -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Футер -->
+    <footer class="bg-primary text-white mt-12">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-2 gap-8">
+                <div>
+                    <img src="images/logo.png" alt="GREEN MARKET" class="h-12 mb-4">
+                    <div class="space-y-2">
+                        <p>+380-99-999-9999</p>
+                        <p>+380-99-999-9999</p>
+                        <p>+380-99-999-9999</p>
+                        <p>sad_gorod@gmail.com</p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Наші соцмережі</h3>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-2xl"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" class="text-2xl"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="text-2xl"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-2xl"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-2xl"><i class="fab fa-telegram"></i></a>
+                    </div>
+                    <p class="mt-4">вул.Зелена 55а</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.carousel-item');
+        let slideInterval;
+        
+        function showSlide(index) {
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+                slide.style.opacity = '0';
+            });
+            
+            currentSlide = (index + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            slides[currentSlide].style.opacity = '1';
+        }
+        
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+            resetInterval();
+        }
+        
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+            resetInterval();
+        }
+
+        function resetInterval() {
+            clearInterval(slideInterval);
+            slideInterval = setInterval(nextSlide, 5000);
+        }
+        
+        // Автоматична зміна слайдів кожні 5 секунд
+        slideInterval = setInterval(nextSlide, 5000);
+
+        // Додаємо обробку свайпів для каруселі
+        const carousel = document.querySelector('.carousel');
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        carousel.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        carousel.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleCarouselSwipe();
+        });
+
+        function handleCarouselSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        }
+
+        // Додаємо паузу при наведенні
+        carousel.addEventListener('mouseenter', () => {
+            clearInterval(slideInterval);
+        });
+
+        carousel.addEventListener('mouseleave', () => {
+            slideInterval = setInterval(nextSlide, 5000);
+        });
+
+        // Код для відгуків
+        document.addEventListener('DOMContentLoaded', function() {
+            const reviewForm = document.getElementById('review-form');
+            const reviewsList = document.getElementById('reviews-list');
+            
+            // Завантаження відгуків з localStorage
+            let reviews = JSON.parse(localStorage.getItem('reviews')) || [];
+            renderReviews();
+            
+            // Обробка відправки форми
+            reviewForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('review-name').value;
+                const rating = document.querySelector('input[name="rating"]:checked').value;
+                const text = document.getElementById('review-text').value;
+                
+                // Створення нового відгуку
+                const review = {
+                    id: Date.now(),
+                    name,
+                    rating,
+                    text,
+                    date: new Date().toLocaleDateString()
+                };
+                
+                // Додавання відгуку до масиву
+                reviews.unshift(review);
+                
+                // Збереження в localStorage
+                localStorage.setItem('reviews', JSON.stringify(reviews));
+                
+                // Оновлення відображення
+                renderReviews();
+                
+                // Очищення форми
+                reviewForm.reset();
+            });
+            
+            // Функція для відображення відгуків
+            function renderReviews() {
+                reviewsList.innerHTML = reviews.map(review => `
+                    <div class="bg-light-green rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold">${review.name}</h3>
+                            <div class="flex items-center">
+                                <span class="text-dark-green mr-2">${review.rating}/5</span>
+                                <span class="text-sm text-gray-600">${review.date}</span>
+                            </div>
+                        </div>
+                        <p>${review.text}</p>
+                    </div>
+                `).join('');
+            }
+        });
+
+        // Оновлюємо функцію для прокрутки товарів
+        function scrollProducts(containerId, direction) {
+            const container = document.getElementById(containerId);
+            const cardWidth = 300; // Ширина картки
+            const gap = 24; // Відступ між картками
+            const scrollAmount = cardWidth + gap;
+            
+            if (direction === 'left') {
+                container.scrollLeft -= scrollAmount;
+            } else {
+                container.scrollLeft += scrollAmount;
+            }
+        }
+
+        // Додаємо обробку свайпів для товарів
+        document.querySelectorAll('.products-container').forEach(container => {
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            container.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            container.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleProductSwipe(container, touchStartX, touchEndX);
+            });
+        });
+
+        function handleProductSwipe(container, startX, endX) {
+            const swipeThreshold = 50;
+            const diff = startX - endX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    scrollProducts(container.id, 'right');
+                } else {
+                    scrollProducts(container.id, 'left');
+                }
+            }
+        }
+
+        // Додаємо масив товарів
+        const products = [
+            {
+                id: 1,
+                name: "Штучне дерево",
+                price: "1600 ₴",
+                image: "images/flower.jpg",
+                url: "/product.html?id=1"
+            },
+            {
+                id: 2,
+                name: "Міні лопата",
+                price: "1230 ₴",
+                image: "images/stovp.jpg",
+                url: "/product.html?id=2"
+            },
+            {
+                id: 3,
+                name: "Поливна система",
+                price: "2000 ₴",
+                image: "images/flower.jpg",
+                url: "/product.html?id=3"
+            },
+            {
+                id: 4,
+                name: "Квітка 'Фіалка'",
+                price: "330 ₴",
+                image: "images/stovp.jpg",
+                url: "/product.html?id=4"
+            },
+            {
+                id: 5,
+                name: "Садові ножиці",
+                price: "450 ₴",
+                image: "images/flower.jpg",
+                url: "/product.html?id=5"
+            },
+            {
+                id: 6,
+                name: "Газонокосарка",
+                price: "8500 ₴",
+                image: "images/stovp.jpg",
+                url: "/product.html?id=6"
+            },
+            {
+                id: 7,
+                name: "Садовий стіл",
+                price: "3200 ₴",
+                image: "images/flower.jpg",
+                url: "/product.html?id=7"
+            },
+            {
+                id: 8,
+                name: "Земля 50л",
+                price: "1500 ₴",
+                image: "images/flower.jpg",
+                url: "/product.html?id=8"
+            },
+            {
+                id: 9,
+                name: "Поливний шланг 1м",
+                price: "200 ₴",
+                image: "images/stovp.jpg",
+                url: "/product.html?id=9"
+            },
+            {
+                id: 10,
+                name: "Відро 20л",
+                price: "250 ₴",
+                image: "images/flower.jpg",
+                url: "/product.html?id=10"
+            }
+        ];
+
+        // Функція для пошуку товарів
+        function searchProducts(query) {
+            if (query.length < 1) {
+                return [];
+            }
+            const searchQuery = query.toLowerCase();
+            return products.filter(product => 
+                product.name.toLowerCase().includes(searchQuery)
+            );
+        }
+
+        // Функція для відображення результатів пошуку
+        function displaySearchResults(results) {
+            const searchResults = document.getElementById('search-results');
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="p-4 text-gray-500">Нічого не знайдено</div>';
+                searchResults.classList.remove('hidden');
+                return;
+            }
+
+            searchResults.innerHTML = results.map(product => `
+                <a href="${product.url}" class="block p-4 hover:bg-gray-100">
+                    <div class="flex items-center space-x-4">
+                        <img src="${product.image}" alt="${product.name}" class="w-12 h-12 object-cover rounded">
+                        <div>
+                            <div class="font-medium">${product.name}</div>
+                            <div class="text-sm text-gray-600">${product.price}</div>
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+
+            searchResults.classList.remove('hidden');
+        }
+
+        // Додаємо обробники подій для пошуку
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-input');
+            const searchResults = document.getElementById('search-results');
+            let searchTimeout;
+
+            searchInput.addEventListener('input', function(e) {
+                clearTimeout(searchTimeout);
+                const query = e.target.value.trim();
+
+                searchTimeout = setTimeout(() => {
+                    const results = searchProducts(query);
+                    displaySearchResults(results);
+                }, 300);
+            });
+
+            // Закриваємо результати пошуку при кліку поза ними
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.add('hidden');
+                }
+            });
+
+            // Закриваємо результати пошуку при натисканні Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    searchResults.classList.add('hidden');
+                }
+            });
+        });
+
+        // Додаємо функціонал корзини
+        let cart = [];
+
+        function updateCartCount() {
+            const cartCount = document.getElementById('cart-count');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+        }
+
+        function updateCartDropdown() {
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="p-4 text-center text-gray-500">Корзина порожня</div>';
+                cartTotal.textContent = '0 ₴';
+                return;
+            }
+
+            cartItems.innerHTML = cart.map(item => {
+                // Видаляємо всі символи крім цифр
+                const priceStr = item.price.replace(/[^0-9]/g, '');
+                const price = parseInt(priceStr);
+                const itemTotal = price * item.quantity;
+
+                return `
+                    <div class="flex items-center space-x-4">
+                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded">
+                        <div class="flex-1">
+                            <h4 class="font-medium">${item.name}</h4>
+                            <p class="text-gray-600">${item.price}</p>
+                            <div class="flex items-center space-x-2 mt-1">
+                                <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})" class="text-gray-600 hover:text-primary">-</button>
+                                <span>${item.quantity}</span>
+                                <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})" class="text-gray-600 hover:text-primary">+</button>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">Сума: ${itemTotal} ₴</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const total = cart.reduce((sum, item) => {
+                const priceStr = item.price.replace(/[^0-9]/g, '');
+                const price = parseInt(priceStr);
+                return sum + (price * item.quantity);
+            }, 0);
+            
+            cartTotal.textContent = `${total} ₴`;
+        }
+
+        function updateQuantity(productId, newQuantity) {
+            if (newQuantity < 1) {
+                cart = cart.filter(item => item.id !== productId);
+            } else {
+                const item = cart.find(item => item.id === productId);
+                if (item) {
+                    item.quantity = newQuantity;
+                }
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            updateCartDropdown();
+        }
+
+        function addToCart(productId, name, price, image) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Перевіряємо, чи товар дозволений до додавання
+            const allowedProducts = ['Міні лопата', 'Поливний шланг 1м'];
+            if (!allowedProducts.includes(name)) {
+                alert('Цей товар не можна додати до кошика');
+                return;
+            }
+
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: productId,
+                    name,
+                    price,
+                    image,
+                    quantity: 1
+                });
+            }
+
+            // Зберігаємо кошик для конкретного користувача
+            localStorage.setItem('cart', JSON.stringify(cart));
+            localStorage.setItem(`cart_${currentUser.id}`, JSON.stringify(cart));
+            
+            updateCartCount();
+            updateCartDropdown();
+            showAddToCartAnimation();
+        }
+
+        // Додаємо обробники подій для корзини
+        document.addEventListener('DOMContentLoaded', function() {
+            const cartButton = document.getElementById('cart-btn');
+            const cartDropdown = document.getElementById('cart-dropdown');
+
+            cartButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                
+                if (!currentUser) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                cartDropdown.classList.toggle('hidden');
+            });
+
+            // Змінюємо обробник кліків на документі
+            document.addEventListener('click', function(e) {
+                if (!cartButton.contains(e.target) && !cartDropdown.contains(e.target)) {
+                    cartDropdown.classList.add('hidden');
+                }
+            });
+
+            // Оновлюємо відображення корзини при завантаженні сторінки
+            updateCartCount();
+            updateCartDropdown();
+        });
+
+        // Оновлюємо функцію очищення кошика
+        function clearCart() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                cart = [];
+                localStorage.removeItem('cart');
+                localStorage.removeItem(`cart_${currentUser.id}`);
+                updateCartCount();
+                updateCartDropdown();
+                showClearCartNotification();
+            }
+        }
+
+        // Функція для показу повідомлення про очищення кошика
+        function showClearCartNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            notification.textContent = 'Кошик очищено';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Очищаємо кошик при завантаженні сторінки
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                // Додаємо товари до кошика
+                cart = [
+                    {
+                        id: 2,
+                        name: "Міні лопата",
+                        price: "1230 ₴",
+                        image: "images/stovp.jpg",
+                        quantity: 1
+                    },
+                    {
+                        id: 9,
+                        name: "Поливний шланг 1м",
+                        price: "200 ₴",
+                        image: "images/stovp.jpg",
+                        quantity: 6
+                    }
+                ];
+                
+                // Зберігаємо кошик
+                localStorage.setItem('cart', JSON.stringify(cart));
+                localStorage.setItem(`cart_${currentUser.id}`, JSON.stringify(cart));
+                
+                // Оновлюємо відображення
+                updateCartCount();
+                updateCartDropdown();
+            }
+        });
+
+        document.getElementById('checkout-btn').addEventListener('click', function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) {
+                alert('Кошик порожній');
+                return;
+            }
+
+            // Створюємо нове замовлення
+            const order = {
+                id: Date.now(),
+                userId: currentUser.id,
+                date: new Date().toISOString(),
+                items: cart,
+                total: cart.reduce((sum, item) => {
+                    const priceStr = item.price.replace(/[^0-9]/g, '');
+                    const price = parseInt(priceStr);
+                    return sum + (price * item.quantity);
+                }, 0),
+                status: 'Нове'
+            };
+
+            // Отримуємо всі замовлення
+            let orders = JSON.parse(localStorage.getItem('orders')) || [];
+            
+            // Додаємо нове замовлення
+            orders.push(order);
+            
+            // Зберігаємо оновлений список замовлень
+            localStorage.setItem('orders', JSON.stringify(orders));
+            
+            // Очищаємо кошик
+            localStorage.removeItem('cart');
+            localStorage.removeItem(`cart_${currentUser.id}`);
+            
+            // Оновлюємо відображення
+            updateCartCount();
+            updateCartDropdown();
+            
+            // Показуємо повідомлення про успішне оформлення
+            alert('Замовлення успішно оформлено!');
+            
+            // Перенаправляємо на сторінку профілю
+            window.location.href = '/profile.html';
+        });
+
+        // Додаємо функцію для перевірки авторизації
+        function checkAuth() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const authLinks = document.getElementById('auth-links');
+            const userMenu = document.getElementById('user-menu');
+            
+            if (currentUser) {
+                authLinks.classList.add('hidden');
+                userMenu.classList.remove('hidden');
+                // Відновлюємо кошик для авторизованого користувача
+                const userCart = JSON.parse(localStorage.getItem(`cart_${currentUser.id}`)) || [];
+                localStorage.setItem('cart', JSON.stringify(userCart));
+            } else {
+                authLinks.classList.remove('hidden');
+                userMenu.classList.add('hidden');
+                // Очищаємо кошик для неавторизованого користувача
+                localStorage.removeItem('cart');
+            }
+            updateCartCount();
+            updateCartDropdown();
+        }
+
+        // Оновлюємо обробник виходу
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('cart');
+            window.location.reload();
+        });
+
+        // Перевіряємо авторизацію при завантаженні сторінки
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

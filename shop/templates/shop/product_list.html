@@ -1,0 +1,112 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if category %}{{ category.name }}{% else %}Товари{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Categories Sidebar -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Категорії</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'shop:product_list' %}" 
+                       class="list-group-item list-group-item-action {% if not category %}active{% endif %}">
+                        Всі товари
+                    </a>
+                    {% for c in categories %}
+                    <a href="{{ c.get_absolute_url }}" 
+                       class="list-group-item list-group-item-action {% if category.slug == c.slug %}active{% endif %}">
+                        {{ c.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="col-lg-9">
+            <div class="row">
+                {% if category %}
+                <h1 class="mb-4">{{ category.name }}</h1>
+                {% else %}
+                <h1 class="mb-4">Всі товари</h1>
+                {% endif %}
+            </div>
+            
+            <div class="row g-4">
+                {% for product in products %}
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <a href="{{ product.get_absolute_url }}" class="product-image">
+                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        </a>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">{{ product.description|truncatewords:20 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="price">
+                                    {% if product.discount %}
+                                    <span class="text-muted text-decoration-line-through">{{ product.price }} грн</span>
+                                    <span class="text-danger ms-2">{{ product.get_discounted_price }} грн</span>
+                                    {% else %}
+                                    <span>{{ product.price }} грн</span>
+                                    {% endif %}
+                                </div>
+                                <a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary">Детальніше</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        Товарів не знайдено.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.product-image {
+    overflow: hidden;
+    height: 200px;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.product-image:hover img {
+    transform: scale(1.1);
+}
+
+.card {
+    transition: all 0.3s;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.list-group-item.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %} 

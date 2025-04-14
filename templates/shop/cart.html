@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cart - Shop{% endblock %}
+
+{% block content %}
+<div class="cart-container">
+    <h2>Your Cart</h2>
+    {% if cart_items %}
+    <div class="cart-items">
+        {% for item in cart_items %}
+        <div class="cart-item">
+            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+            <div class="item-details">
+                <h3>{{ item.product.name }}</h3>
+                <p class="price">${{ item.product.price }}</p>
+                <p class="quantity">Quantity: {{ item.quantity }}</p>
+                <button class="remove-item" data-cart-item-id="{{ item.id }}">Remove</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="cart-summary">
+        <h3>Order Summary</h3>
+        <p>Total Items: {{ cart_items|length }}</p>
+        <p>Total Price: ${{ cart.total_price }}</p>
+        <a href="{% url 'shop:create_order' %}" class="btn-primary">Proceed to Checkout</a>
+    </div>
+    {% else %}
+    <div class="empty-cart">
+        <p>Your cart is empty</p>
+        <a href="{% url 'shop:home' %}" class="btn-primary">Continue Shopping</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.remove-item').forEach(button => {
+    button.addEventListener('click', function() {
+        const cartItemId = this.dataset.cartItemId;
+        fetch(`/cart/remove/${cartItemId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

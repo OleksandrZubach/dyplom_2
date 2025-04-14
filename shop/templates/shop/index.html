@@ -1,0 +1,361 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}САД та ГОРОД{% endblock %}
+
+{% block content %}
+<!-- Хедер -->
+<header class="bg-white shadow-md">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+            <a href="/" class="text-2xl font-bold text-dark-green">САД та ГОРОД</a>
+        </div>
+        <div class="flex-1 max-w-xl mx-4">
+            <div class="relative">
+                <input type="text" id="search-input" placeholder="Пошук товарів..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <div id="search-results" class="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg hidden"></div>
+            </div>
+        </div>
+        <nav class="flex items-center space-x-4">
+            <div id="auth-links">
+                <a href="/login.html" class="text-gray-600 hover:text-primary">Увійти</a>
+                <a href="/register.html" class="ml-4 text-gray-600 hover:text-primary">Реєстрація</a>
+            </div>
+            <div id="user-menu" class="hidden">
+                <a href="/profile.html" class="text-gray-600 hover:text-primary">Профіль</a>
+                <button id="logout-btn" class="ml-4 text-gray-600 hover:text-primary">Вийти</button>
+            </div>
+            <div class="relative">
+                <button id="cart-btn" class="flex items-center text-gray-600 hover:text-primary">
+                    <i class="fas fa-shopping-cart"></i>
+                </button>
+                <div id="cart-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-4">Кошик</h3>
+                        <div id="cart-items" class="space-y-4">
+                            <!-- Тут будуть відображатися товари -->
+                        </div>
+                        <div class="mt-4 pt-4 border-t">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="font-semibold">Всього:</span>
+                                <span id="cart-total" class="font-semibold">0 ₴</span>
+                            </div>
+                            <div class="space-y-2">
+                                <button onclick="clearCart()" class="block w-full text-center bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors">
+                                    Очистити кошик
+                                </button>
+                                <a href="/cart.html" class="block w-full text-center bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                    Переглянути кошик
+                                </a>
+                                <button id="checkout-btn" class="block w-full text-center bg-dark-green text-white py-2 rounded-lg hover:bg-primary transition-colors">
+                                    Оформити замовлення
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<!-- Банер з пропозиціями -->
+<div class="bg-dark-green text-white py-2">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-truck"></i>
+                <span>Безкоштовна доставка від 1000₴</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-phone"></i>
+                <span>+380 (99) 123-45-67</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-clock"></i>
+                <span>Працюємо: 9:00 - 20:00</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Основний контент -->
+<main class="container mx-auto px-4 py-8">
+    <!-- Категорії та банер -->
+    <div class="flex gap-6 mb-8">
+        <!-- Меню категорій -->
+        <div class="w-1/4">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                {% for category in categories %}
+                <div class="menu-item">
+                    <a href="{% url 'shop:product_list_by_category' category.slug %}" class="flex items-center p-4 hover:bg-light-green transition-colors">
+                        <i class="fas fa-seedling w-6"></i>
+                        <span class="flex-1">{{ category.name }}</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Банер -->
+        <div class="w-3/4">
+            <div class="carousel rounded-lg overflow-hidden shadow-md">
+                <div class="carousel-item active">
+                    <img src="{% static 'images/banner1.jpg' %}" alt="Акція" class="w-full h-96 object-cover">
+                    <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                        <div class="text-center text-white">
+                            <h2 class="text-4xl font-bold mb-4">Весняні знижки</h2>
+                            <p class="text-xl mb-6">До -50% на садовий інвентар</p>
+                            <a href="#" class="bg-primary hover:bg-dark-green text-white px-8 py-3 rounded-lg transition-colors">
+                                Дізнатися більше
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Новинки -->
+    <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6 text-dark-green">Новинки</h2>
+        <div class="relative">
+            <div class="products-container">
+                {% for product in new_products %}
+                <div class="product-card">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover rounded-t-lg">
+                    <div class="p-4">
+                        <h3 class="font-semibold mb-2">{{ product.name }}</h3>
+                        <p class="text-gray-600 mb-4">{{ product.price }} ₴</p>
+                        <button class="w-full bg-primary text-white py-2 rounded hover:bg-dark-green transition-colors">
+                            Додати в кошик
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="scroll-button prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="scroll-button next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- Топ продажів -->
+    <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-6 text-dark-green">Топ продажів</h2>
+        <div class="relative">
+            <div class="products-container">
+                {% for product in top_sellers %}
+                <div class="product-card">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover rounded-t-lg">
+                    <div class="p-4">
+                        <h3 class="font-semibold mb-2">{{ product.name }}</h3>
+                        <p class="text-gray-600 mb-4">{{ product.price }} ₴</p>
+                        <button class="w-full bg-primary text-white py-2 rounded hover:bg-dark-green transition-colors">
+                            Додати в кошик
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="scroll-button prev">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="scroll-button next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+</main>
+
+<!-- Футер -->
+<footer class="bg-dark-green text-white py-8">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-4 gap-8">
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Про нас</h3>
+                <p class="text-gray-300">
+                    Ми пропонуємо широкий вибір товарів для саду та городу за найкращими цінами.
+                </p>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Контакти</h3>
+                <ul class="space-y-2 text-gray-300">
+                    <li>
+                        <i class="fas fa-phone mr-2"></i>
+                        +380 (99) 123-45-67
+                    </li>
+                    <li>
+                        <i class="fas fa-envelope mr-2"></i>
+                        info@sadgorod.com
+                    </li>
+                    <li>
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        вул. Садова 1, м. Київ
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Інформація</h3>
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" class="text-gray-300 hover:text-white">Доставка і оплата</a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-300 hover:text-white">Гарантія</a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-gray-300 hover:text-white">Повернення товару</a>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Соціальні мережі</h3>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-300 hover:text-white">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="text-gray-300 hover:text-white">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" class="text-gray-300 hover:text-white">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Прокрутка товарів
+    document.querySelectorAll('.products-container').forEach(container => {
+        const prev = container.parentElement.querySelector('.prev');
+        const next = container.parentElement.querySelector('.next');
+        
+        prev.addEventListener('click', () => {
+            container.scrollBy({
+                left: -300,
+                behavior: 'smooth'
+            });
+        });
+        
+        next.addEventListener('click', () => {
+            container.scrollBy({
+                left: 300,
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // Кошик
+    const cartBtn = document.getElementById('cart-btn');
+    const cartDropdown = document.getElementById('cart-dropdown');
+
+    cartBtn.addEventListener('click', () => {
+        cartDropdown.classList.toggle('hidden');
+    });
+
+    // Закриття кошика при кліку поза ним
+    document.addEventListener('click', (e) => {
+        if (!cartBtn.contains(e.target) && !cartDropdown.contains(e.target)) {
+            cartDropdown.classList.add('hidden');
+        }
+    });
+});
+</script>
+
+{% block extra_css %}
+<style>
+    /* Стилі для меню категорій */
+    .menu-item {
+        border-bottom: 1px solid #eee;
+    }
+    
+    .menu-item:last-child {
+        border-bottom: none;
+    }
+    
+    /* Стилі для карусели */
+    .carousel {
+        position: relative;
+        height: 400px;
+    }
+    
+    .carousel-item {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+    }
+    
+    .carousel-item.active {
+        opacity: 1;
+    }
+    
+    /* Стилі для контейнера з товарами */
+    .products-container {
+        display: flex;
+        overflow-x: auto;
+        gap: 1rem;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .products-container::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* Стилі для карточки товару */
+    .product-card {
+        flex: 0 0 280px;
+        background: white;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-4px);
+    }
+    
+    /* Стилі для кнопок прокрутки */
+    .scroll-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: white;
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+    }
+    
+    .scroll-button.prev {
+        left: -20px;
+    }
+    
+    .scroll-button.next {
+        right: -20px;
+    }
+    
+    .scroll-button:hover {
+        background: #f0f0f0;
+    }
+</style>
+{% endblock %}
+{% endblock %} 

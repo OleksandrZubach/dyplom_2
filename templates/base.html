@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Shop{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="main-nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <a href="{% url 'shop:home' %}">Shop</a>
+                </div>
+                <div class="nav-links">
+                    <a href="{% url 'shop:home' %}" class="nav-link">Home</a>
+                    <a href="{% url 'shop:category_list' %}" class="nav-link">Categories</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'shop:profile' %}" class="nav-link">Profile</a>
+                        <a href="{% url 'shop:cart' %}" class="nav-link">
+                            Cart <span class="cart-count">{{ cart_count }}</span>
+                        </a>
+                        <a href="{% url 'shop:logout' %}" class="nav-link">Logout</a>
+                    {% else %}
+                        <a href="{% url 'shop:login' %}" class="nav-link">Login</a>
+                        <a href="{% url 'shop:register' %}" class="nav-link">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Shop. All rights reserved.</p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

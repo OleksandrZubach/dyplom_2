@@ -1,0 +1,164 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Сад та Город - Головна{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section position-relative">
+    <div class="hero-image" style="background-image: url('{% static "images/garden-hero.jpg" %}');">
+        <div class="hero-overlay"></div>
+        <div class="container position-relative">
+            <div class="hero-content text-white py-5">
+                <h1 class="display-4 fw-bold">Сад та Город</h1>
+                <p class="lead">Все для вашого саду та городу</p>
+                <a href="{% url 'shop:product_list' %}" class="btn btn-success btn-lg">Перейти до каталогу</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Categories Section -->
+<div class="container my-5">
+    <h2 class="text-center mb-4">Категорії товарів</h2>
+    <div class="row g-4">
+        {% for category in categories %}
+        <div class="col-md-4">
+            <div class="category-card card h-100 border-0 shadow-sm">
+                <img src="{{ category.image.url }}" class="card-img-top" alt="{{ category.name }}">
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ category.name }}</h5>
+                    <a href="{% url 'shop:product_list_by_category' category.slug %}" class="btn btn-outline-success">Переглянути</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Featured Products -->
+<div class="container my-5">
+    <h2 class="text-center mb-4">Популярні товари</h2>
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-md-3">
+            <div class="product-card card h-100 border-0 shadow-sm">
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text text-success fw-bold">{{ product.price }} грн</p>
+                    <button class="btn btn-success add-to-cart" data-product-id="{{ product.id }}">
+                        Додати до кошика
+                    </button>
+                    <button class="btn btn-outline-success quick-view" data-product-id="{{ product.id }}">
+                        Швидкий перегляд
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Benefits Section -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="bi bi-truck text-success display-4"></i>
+                    <h4 class="mt-3">Швидка доставка</h4>
+                    <p>Доставка по всій Україні</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="bi bi-shield-check text-success display-4"></i>
+                    <h4 class="mt-3">Гарантія якості</h4>
+                    <p>Тільки перевірені постачальники</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="bi bi-headset text-success display-4"></i>
+                    <h4 class="mt-3">Підтримка 24/7</h4>
+                    <p>Наші консультанти завжди на зв'язку</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Newsletter Section -->
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <h3>Підпишіться на розсилку</h3>
+            <p>Отримуйте актуальні пропозиції та знижки</p>
+            <form class="newsletter-form">
+                <div class="input-group mb-3">
+                    <input type="email" class="form-control" placeholder="Ваш email" required>
+                    <button class="btn btn-success" type="submit">Підписатися</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-section {
+    height: 500px;
+    margin-bottom: 50px;
+}
+
+.hero-image {
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.hero-content {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.category-card img {
+    height: 200px;
+    object-fit: cover;
+}
+
+.product-card img {
+    height: 200px;
+    object-fit: cover;
+}
+
+.product-card .card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card .btn {
+    margin-top: auto;
+    margin-bottom: 10px;
+}
+</style>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/cart.js' %}"></script>
+{% endblock %} 

@@ -1,0 +1,51 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}
+    {% if category %}{{ category.name }}{% else %}Products{% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-3">
+                <h3>Categories</h3>
+                <ul class="list-group">
+                    <li class="list-group-item {% if not category %}active{% endif %}">
+                        <a href="{% url 'shop:product_list' %}" class="text-decoration-none">All</a>
+                    </li>
+                    {% for c in categories %}
+                        <li class="list-group-item {% if category.slug == c.slug %}active{% endif %}">
+                            <a href="{{ c.get_absolute_url }}" class="text-decoration-none">{{ c.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-9">
+                <h1>{% if category %}{{ category.name }}{% else %}Products{% endif %}</h1>
+                <div class="row">
+                    {% for product in products %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <a href="{{ product.get_absolute_url }}">
+                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                                </a>
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <a href="{{ product.get_absolute_url }}" class="text-decoration-none">{{ product.name }}</a>
+                                    </h5>
+                                    <p class="card-text">${{ product.price }}</p>
+                                    <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
+                                        Add to cart
+                                    </button>
+                                    <button class="btn btn-outline-secondary quick-view" data-product-id="{{ product.id }}">
+                                        Quick view
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

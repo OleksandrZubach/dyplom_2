@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Shop{% endblock %}
+
+{% block content %}
+<div class="product-detail-container">
+    <div class="product-images">
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="main-image">
+    </div>
+    <div class="product-info">
+        <h1>{{ product.name }}</h1>
+        <p class="price">${{ product.price }}</p>
+        <div class="product-description">
+            {{ product.description }}
+        </div>
+        <div class="product-meta">
+            <p><strong>Category:</strong> <a href="{% url 'shop:category_detail' product.category.slug %}">{{ product.category.name }}</a></p>
+            <p><strong>Availability:</strong> {% if product.available %}In Stock{% else %}Out of Stock{% endif %}</p>
+        </div>
+        {% if product.available and user.is_authenticated %}
+        <div class="product-actions">
+            <button class="add-to-cart" data-product-id="{{ product.id }}">Add to Cart</button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelector('.add-to-cart').addEventListener('click', function() {
+    const productId = this.dataset.productId;
+    fetch(`/cart/add/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Product added to cart!');
+        }
+    });
+});
+</script>
+{% endblock %} 

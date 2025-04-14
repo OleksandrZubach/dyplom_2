@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - Shop{% endblock %}
+
+{% block content %}
+<div class="category-detail-container">
+    <h2>{{ category.name }}</h2>
+    <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <a href="{% url 'shop:product_detail' product.slug %}">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                <h3>{{ product.name }}</h3>
+                <p class="price">${{ product.price }}</p>
+            </a>
+            {% if user.is_authenticated %}
+            <button class="add-to-cart" data-product-id="{{ product.id }}">Add to Cart</button>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p>No products found in this category.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', function() {
+        const productId = this.dataset.productId;
+        fetch(`/cart/add/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Product added to cart!');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 
